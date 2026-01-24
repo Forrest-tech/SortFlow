@@ -65,6 +65,46 @@ export async function getExceptions(limit = 25): Promise<ExceptionItem[]> {
   return fetchApi<ExceptionItem[]>(`/api/exceptions?limit=${limit}`);
 }
 
+export interface ZoneItem {
+  id: string;
+  name: string;
+  code: string;
+  isActive: boolean;
+  stationCount: number;
+}
+
+export async function getZones(): Promise<ZoneItem[]> {
+  return fetchApi<ZoneItem[]>('/api/zones');
+}
+
+export interface StationItem {
+  id: string;
+  name: string;
+  stationCode: string;
+  isActive: boolean;
+  zoneName: string;
+  zoneId: string;
+}
+
+export async function getStations(): Promise<StationItem[]> {
+  return fetchApi<StationItem[]>('/api/stations');
+}
+
+export interface EventItem {
+  id: string;
+  itemId: string;
+  postalCode: string;
+  processedAtUtc: string;
+  isSuccessful: boolean;
+  exceptionType: string | null;
+  stationName: string;
+  zoneName: string;
+}
+
+export async function getEvents(limit = 50): Promise<EventItem[]> {
+  return fetchApi<EventItem[]>(`/api/events?limit=${limit}`);
+}
+
 export function getSignalRHubUrl(): string {
   return `${API_BASE}/hubs/dashboard`;
 }

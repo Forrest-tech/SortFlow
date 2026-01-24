@@ -9,7 +9,10 @@
 ## Features
 
 - **Live dashboard** — Items/min, items/hour, total/successful/exceptions in the last hour
-- **Exception list** — Type, item, station, details, and time (UTC)
+- **Events** — Activity log of sorting events (item, postal, station, zone, result, time)
+- **Exceptions** — Type, item, station, details, and time (UTC)
+- **Zones** — List of zones with station count and status
+- **Stations** — List of stations with zone and status
 - **Real-time updates** — SignalR pushes new sorting events to the dashboard
 - **JWT auth** — Dev token endpoint for local sign-in; frontend stores token and calls protected APIs
 - **Demo data** — Background service generates simulated sorting events and exceptions
@@ -51,14 +54,14 @@
 
    → [http://localhost:3000](http://localhost:3000)
 
-4. **Use the app** — Open http://localhost:3000 → **Get dev token & sign in** → **Dashboard** (live) and **Exceptions**.
+4. **Use the app** — Open http://localhost:3000 → **Get dev token & sign in** → **Dashboard** (live), **Events**, **Exceptions**, **Zones**, **Stations**.
 
 ## Project Structure
 
 | Folder           | Description |
 |------------------|-------------|
 | **sortflow-api** | .NET 8 Web API: Clean Architecture, EF Core + PostgreSQL, JWT, SignalR, background event generator |
-| **sortflow-web** | React (Vite, TypeScript): Login, Dashboard, Exceptions, SignalR client |
+| **sortflow-web** | React (Vite, TypeScript): Login, Dashboard, Events, Exceptions, Zones, Stations, SignalR client |
 
 More detail: [sortflow-api/README.md](sortflow-api/README.md) · [sortflow-web/README.md](sortflow-web/README.md)
 
@@ -68,7 +71,10 @@ More detail: [sortflow-api/README.md](sortflow-api/README.md) · [sortflow-web/R
 |--------|------|-------------|
 | `POST` | `/api/auth/token` | Dev JWT (Development only) |
 | `GET`  | `/api/dashboard/summary` | Dashboard KPIs (last hour) |
+| `GET`  | `/api/events?limit=` | Recent sorting events |
 | `GET`  | `/api/exceptions?limit=` | Recent exceptions |
+| `GET`  | `/api/zones` | All zones |
+| `GET`  | `/api/stations` | All stations |
 | `GET`  | `/health` | Health check |
 | `GET`  | `/swagger` | Swagger UI |
 | SignalR | `/hubs/dashboard` | Hub; event `sortingEventReceived` |

@@ -16,7 +16,7 @@ public class ZoneRepository : IZoneRepository
 
     public async Task<IReadOnlyList<Zone>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await _dbContext.Zones.ToListAsync(cancellationToken);
+        return await _dbContext.Zones.Include(z => z.SortingStations).ToListAsync(cancellationToken);
     }
 
     public async Task AddRangeAsync(IEnumerable<Zone> zones, CancellationToken cancellationToken)

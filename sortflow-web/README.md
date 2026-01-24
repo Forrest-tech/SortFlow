@@ -36,7 +36,10 @@ PowerShell’s execution policy can block `npm.ps1`. Use either:
 
 1. **Login** – "Get dev token & sign in" calls `POST /api/auth/token` and stores the JWT.
 2. **Dashboard** – Shows `GET /api/dashboard/summary` and subscribes to SignalR `sortingEventReceived` for live updates.
-3. **Exceptions** – Lists `GET /api/exceptions`.
+3. **Events** – Lists `GET /api/events` (sorting activity log).
+4. **Exceptions** – Lists `GET /api/exceptions`.
+5. **Zones** – Lists `GET /api/zones`.
+6. **Stations** – Lists `GET /api/stations`.
 
 ## Build
 

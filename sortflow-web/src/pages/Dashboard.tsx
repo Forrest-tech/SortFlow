@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link, useLocation } from 'react-router-dom'
 import * as Hub from '@microsoft/signalr'
-import { getDashboardSummary, getSignalRHubUrl, getTokenForSignalR, clearToken } from '../api/client'
+import { getDashboardSummary, getSignalRHubUrl, getTokenForSignalR } from '../api/client'
 import type { DashboardSummary } from '../api/client'
+import Nav from '../components/Nav'
 import './Dashboard.css'
 
 export default function Dashboard() {
@@ -10,7 +10,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [live, setLive] = useState(false)
-  const location = useLocation()
 
   const load = useCallback(async () => {
     try {
@@ -40,18 +39,9 @@ export default function Dashboard() {
     return () => { c.stop() }
   }, [load])
 
-  function handleLogout() {
-    clearToken()
-    window.location.href = '/'
-  }
-
   return (
     <>
-      <nav className="nav">
-        <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>Dashboard</Link>
-        <Link to="/exceptions" className={location.pathname === '/exceptions' ? 'active' : ''}>Exceptions</Link>
-        <button type="button" className="btn btn-ghost" onClick={handleLogout}>Log out</button>
-      </nav>
+      <Nav />
       <div className="dashboard-header">
         <h1>Dashboard</h1>
         {live && <span className="live">Live</span>}

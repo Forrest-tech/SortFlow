@@ -29,4 +29,15 @@ public class SortingEventRepository : ISortingEventRepository
     {
         return _dbContext.SortingEvents.CountAsync(e => e.ProcessedAt >= sinceUtc && e.IsSuccessful, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<SortingEvent>> GetRecentAsync(int limit, CancellationToken cancellationToken)
+    {
+        return await _dbContext.SortingEvents
+            .Include(e => e.SortingStation)
+            .ThenInclude(s => s!.Zone)
+            .Include(e => e.SortingException)
+            .OrderByDescending(e => e.ProcessedAt)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
 }
