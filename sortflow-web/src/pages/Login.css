@@ -1,0 +1,5 @@
+.login { max-width: 320px; margin: 4rem auto; text-align: center; }
+.login h1 { margin-bottom: 0.5rem; }
+.login p { color: #94a3b8; margin-bottom: 1.5rem; }
+.login .btn { width: 100%; }
+.login .error { color: #f87171; font-size: 0.9rem; margin-top: 1rem; }
