@@ -1,57 +1,87 @@
 # SortFlow
 
-Logistics sorting dashboard: .NET 8 API + React (Vite) frontend.
+> Real-time logistics sorting dashboard with live metrics, exception tracking, and JWT authentication.
 
-| Folder         | Description                          |
-|----------------|--------------------------------------|
-| **sortflow-api**  | .NET 8 Web API, PostgreSQL, JWT, SignalR |
-| **sortflow-web**  | React frontend (Vite, TypeScript)       |
+[![.NET](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?logo=postgresql)](https://www.postgresql.org/)
 
-## Run locally
+## Features
 
-1. **PostgreSQL** – running on `localhost:5432` (or adjust `appsettings.json`).
-2. **API:** `cd sortflow-api/src/SortFlow.Api` → `dotnet run` → http://localhost:5000
-3. **Web:** `cd sortflow-web` → `install-and-dev.cmd` or `npm run dev` → http://localhost:3000
+- **Live dashboard** — Items/min, items/hour, total/successful/exceptions in the last hour
+- **Exception list** — Type, item, station, details, and time (UTC)
+- **Real-time updates** — SignalR pushes new sorting events to the dashboard
+- **JWT auth** — Dev token endpoint for local sign-in; frontend stores token and calls protected APIs
+- **Demo data** — Background service generates simulated sorting events and exceptions
+- **Clean Architecture** — API, Application, Domain, Infrastructure (backend); React + Vite (frontend)
 
-See `sortflow-api/README.md` and `sortflow-web/README.md` for details.
+## Tech Stack
 
----
+| Layer    | Technologies |
+|----------|--------------|
+| **Backend**  | .NET 8, Entity Framework Core, PostgreSQL, JWT, SignalR, Swagger, Serilog |
+| **Frontend** | React 18, Vite, TypeScript, React Router, @microsoft/signalr |
 
-## Upload to GitHub
+## Getting Started
 
-**1. Install Git** (if `git` is not recognized):  
-[https://git-scm.com/download/win](https://git-scm.com/download/win) — then restart the terminal.
+### Prerequisites
 
-**2. In Command Prompt or PowerShell, from this folder (`SortFlow`):**
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Node 18+](https://nodejs.org/)
+- [PostgreSQL](https://www.postgresql.org/) (e.g. `localhost:5432`)
 
-```bash
-cd C:\Users\Jadenfly\Documents\SortFlow
+### Run the app
 
-git init
-git add .
-git commit -m "Initial commit: SortFlow API and web app"
-```
+1. **PostgreSQL** — Ensure it’s running and a database exists (or use the connection string in `appsettings.json`; the app creates the DB on first run).
 
-**3. Create a new repo on GitHub**
+2. **API**
+   ```bash
+   cd sortflow-api/src/SortFlow.Api
+   dotnet run
+   ```
+   → [http://localhost:5000](http://localhost:5000) · [Swagger](http://localhost:5000/swagger)
 
-- Go to [github.com/new](https://github.com/new)
-- Name it e.g. `SortFlow` (or `sortflow`)
-- Leave “Add a README” **unchecked** (you already have one)
-- Create the repository
+3. **Web**
+   ```bash
+   cd sortflow-web
+   npm install
+   npm run dev
+   ```
+   On Windows, if `npm` fails in PowerShell, use `install-and-dev.cmd` or run in Command Prompt.
 
-**4. Connect and push**
+   → [http://localhost:3000](http://localhost:3000)
 
-Replace `YOUR_USERNAME` and `YOUR_REPO` with your GitHub user and repo name:
+4. **Use the app** — Open http://localhost:3000 → **Get dev token & sign in** → **Dashboard** (live) and **Exceptions**.
 
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git branch -M main
-git push -u origin main
-```
+## Project Structure
 
-If GitHub prompts for login, use a [Personal Access Token](https://github.com/settings/tokens) as the password when using HTTPS.
+| Folder           | Description |
+|------------------|-------------|
+| **sortflow-api** | .NET 8 Web API: Clean Architecture, EF Core + PostgreSQL, JWT, SignalR, background event generator |
+| **sortflow-web** | React (Vite, TypeScript): Login, Dashboard, Exceptions, SignalR client |
 
----
+More detail: [sortflow-api/README.md](sortflow-api/README.md) · [sortflow-web/README.md](sortflow-web/README.md)
 
-**Before making the repo public:**  
-`sortflow-api/src/SortFlow.Api/appsettings.json` contains a DB password and a dev JWT key. Use [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) or environment variables in production, and consider replacing or removing secrets before publishing.
+## API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/auth/token` | Dev JWT (Development only) |
+| `GET`  | `/api/dashboard/summary` | Dashboard KPIs (last hour) |
+| `GET`  | `/api/exceptions?limit=` | Recent exceptions |
+| `GET`  | `/health` | Health check |
+| `GET`  | `/swagger` | Swagger UI |
+| SignalR | `/hubs/dashboard` | Hub; event `sortingEventReceived` |
+
+## Configuration
+
+- **API:** `sortflow-api/src/SortFlow.Api/appsettings.json`  
+  - `ConnectionStrings:SortFlowDb` — PostgreSQL  
+  - `Jwt:Key`, `Issuer`, `Audience`  
+  - `Cors:AllowedOrigins` — e.g. `http://localhost:3000`
+
+- **Web:** `sortflow-web/src/api/client.ts` — `API_BASE` (default `http://localhost:5000`)
+
+## Security
+
+`appsettings.json` includes a DB password and a dev JWT key. For production or a **public** repo, use [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) or environment variables and avoid committing secrets.
