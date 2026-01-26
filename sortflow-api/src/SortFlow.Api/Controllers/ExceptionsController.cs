@@ -18,23 +18,41 @@ public class ExceptionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ExceptionDto>>> GetRecentExceptions(
-        [FromQuery] int limit = 25,
+    public async Task<ActionResult<PagedResultDto<ExceptionDto>>> Get(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDir = null,
+        [FromQuery] Guid? zoneId = null,
+        [FromQuery] Guid? stationId = null,
+        [FromQuery] DateTimeOffset? timeFrom = null,
+        [FromQuery] DateTimeOffset? timeTo = null,
+        [FromQuery] string? exceptionType = null,
         CancellationToken cancellationToken = default)
     {
-        limit = Math.Clamp(limit, 1, 200);
-        var exceptions = await _exceptionRepository.GetRecentAsync(limit, cancellationToken);
-
-        var response = exceptions.Select(exceptionItem => new ExceptionDto
+        var filter = new ExceptionsFilterDto
         {
-            Id = exceptionItem.Id,
-            ExceptionType = exceptionItem.ExceptionType.ToString(),
-            Details = exceptionItem.Details,
-            ItemId = exceptionItem.SortingEvent?.ItemId ?? string.Empty,
-            StationName = exceptionItem.SortingEvent?.SortingStation?.Name ?? string.Empty,
-            CreatedAtUtc = exceptionItem.CreatedAt
+            Page = page,
+            PageSize = pageSize,
+            SortBy = sortBy,
+            SortDir = sortDir,
+            ZoneId = zoneId,
+            StationId = stationId,
+            TimeFrom = timeFrom,
+            TimeTo = timeTo,
+            ExceptionType = exceptionType
+        };
+        var paged = await _exceptionRepository.GetPagedAsync(filter, cancellationToken);
+        var dtos = paged.Items.Select(ex => new ExceptionDto
+        {
+            Id = ex.Id,
+            ExceptionType = ex.ExceptionType.ToString(),
+            Details = ex.Details,
+            ItemId = ex.SortingEvent?.ItemId ?? string.Empty,
+            StationName = ex.SortingEvent?.SortingStation?.Name ?? string.Empty,
+            CreatedAtUtc = ex.Timestamp
         }).ToList();
 
-        return Ok(response);
+        return Ok(new PagedResultDto<ExceptionDto> { Items = dtos, TotalCount = paged.TotalCount, Page = paged.Page, PageSize = paged.PageSize });
     }
 }

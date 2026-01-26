@@ -12,6 +12,43 @@ services:
       - "5432:5432"
     volumes:
       - sortflow_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sortflow -d sortflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sortflow-api
+    restart: unless-stopped
+    ports:
+      - "5000:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:80
+      ConnectionStrings__SortFlowDb: "Host=postgres;Port=5432;Database=sortflow;Username=sortflow;Password=sortflow_pw"
+      Jwt__Key: "ChangeMeToAStrongKeyAtLeast32Chars!!"
+      Jwt__Issuer: "SortFlow"
+      Jwt__Audience: "SortFlowClients"
+      Cors__AllowedOrigins__0: "http://localhost:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # pgAdmin (optional): uncomment to enable. Open http://localhost:5050
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   container_name: sortflow-pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@local.dev
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - postgres
 
 volumes:
   sortflow_pgdata:

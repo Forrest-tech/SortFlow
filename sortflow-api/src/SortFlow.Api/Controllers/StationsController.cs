@@ -10,26 +10,62 @@ namespace SortFlow.Api.Controllers;
 [Authorize]
 public class StationsController : ControllerBase
 {
-    private readonly ISortingStationRepository _stationRepository;
+    private readonly IStationService _stationService;
 
-    public StationsController(ISortingStationRepository stationRepository)
+    public StationsController(IStationService stationService)
     {
-        _stationRepository = stationRepository;
+        _stationService = stationService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<StationDto>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<StationDto>>> GetAll(CancellationToken ct)
     {
-        var stations = await _stationRepository.GetAllAsync(cancellationToken);
-        var dtos = stations.Select(s => new StationDto
+        var list = await _stationService.GetAllAsync(ct);
+        return Ok(list);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<StationDto>> GetById(Guid id, CancellationToken ct)
+    {
+        var s = await _stationService.GetByIdAsync(id, ct);
+        if (s == null) return NotFound();
+        return Ok(s);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<StationDto>> Create([FromBody] StationDto dto, CancellationToken ct)
+    {
+        try
         {
-            Id = s.Id,
-            Name = s.Name,
-            StationCode = s.StationCode,
-            IsActive = s.IsActive,
-            ZoneId = s.ZoneId,
-            ZoneName = s.Zone?.Name ?? string.Empty
-        }).ToList();
-        return Ok(dtos);
+            var created = await _stationService.CreateAsync(dto, ct);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<StationDto>> Update(Guid id, [FromBody] StationDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var updated = await _stationService.UpdateAsync(id, dto, ct);
+            if (updated == null) return NotFound();
+            return Ok(updated);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var ok = await _stationService.DeleteAsync(id, ct);
+        if (!ok) return NotFound();
+        return NoContent();
     }
 }

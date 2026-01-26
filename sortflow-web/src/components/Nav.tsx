@@ -5,8 +5,10 @@ const links = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/events', label: 'Events' },
   { to: '/exceptions', label: 'Exceptions' },
+  { to: '/history', label: 'History' },
   { to: '/zones', label: 'Zones' },
   { to: '/stations', label: 'Stations' },
+  { to: '/settings', label: 'Settings' },
 ]
 
 export default function Nav() {

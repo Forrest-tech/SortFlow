@@ -49,4 +49,35 @@ public class AuthController : ControllerBase
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
         return Ok(new { token = tokenString });
     }
+
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] LoginRequest request)
+    {
+        if (request == null || string.IsNullOrEmpty(request.Username))
+            return BadRequest(new { error = "Username and password required." });
+
+        if (!_env.IsDevelopment() && (request.Username != "admin" || request.Password != "changeme"))
+            return Unauthorized(new { error = "Invalid credentials." });
+
+        var jwt = _config.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwt["Key"] ?? string.Empty);
+        if (key.Length < 32)
+            return BadRequest("Jwt:Key must be at least 32 characters.");
+
+        var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            issuer: jwt["Issuer"],
+            audience: jwt["Audience"],
+            claims: new[] { new Claim(ClaimTypes.NameIdentifier, request.Username ?? "user") },
+            expires: DateTime.UtcNow.AddHours(24),
+            signingCredentials: creds);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        return Ok(new { token = tokenString });
+    }
+}
+
+public sealed class LoginRequest
+{
+    public string? Username { get; set; }
+    public string? Password { get; set; }
 }

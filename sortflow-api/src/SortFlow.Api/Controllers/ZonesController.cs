@@ -10,25 +10,55 @@ namespace SortFlow.Api.Controllers;
 [Authorize]
 public class ZonesController : ControllerBase
 {
-    private readonly IZoneRepository _zoneRepository;
+    private readonly IZoneService _zoneService;
 
-    public ZonesController(IZoneRepository zoneRepository)
+    public ZonesController(IZoneService zoneService)
     {
-        _zoneRepository = zoneRepository;
+        _zoneService = zoneService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ZoneDto>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<ZoneDto>>> GetAll(CancellationToken ct)
     {
-        var zones = await _zoneRepository.GetAllAsync(cancellationToken);
-        var dtos = zones.Select(z => new ZoneDto
+        var list = await _zoneService.GetAllAsync(ct);
+        return Ok(list);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<ZoneDto>> GetById(Guid id, CancellationToken ct)
+    {
+        var z = await _zoneService.GetByIdAsync(id, ct);
+        if (z == null) return NotFound();
+        return Ok(z);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ZoneDto>> Create([FromBody] ZoneDto dto, CancellationToken ct)
+    {
+        var created = await _zoneService.CreateAsync(dto, ct);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<ZoneDto>> Update(Guid id, [FromBody] ZoneDto dto, CancellationToken ct)
+    {
+        var updated = await _zoneService.UpdateAsync(id, dto, ct);
+        if (updated == null) return NotFound();
+        return Ok(updated);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        try
         {
-            Id = z.Id,
-            Name = z.Name,
-            Code = z.Code,
-            IsActive = z.IsActive,
-            StationCount = z.SortingStations?.Count ?? 0
-        }).ToList();
-        return Ok(dtos);
+            var ok = await _zoneService.DeleteAsync(id, ct);
+            if (!ok) return NotFound();
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }

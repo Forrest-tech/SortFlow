@@ -16,6 +16,8 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("SortFlowDb"));
         });
 
+        services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+        services.AddScoped<IHistoryRepository, HistoryRepository>();
         services.AddScoped<ISortingEventRepository, SortingEventRepository>();
         services.AddScoped<ISortingExceptionRepository, SortingExceptionRepository>();
         services.AddScoped<ISortingStationRepository, SortingStationRepository>();

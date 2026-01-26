@@ -1,63 +1,111 @@
-import { useState, useEffect } from 'react'
-import { getEvents } from '../api/client'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { getEvents, getDashboardSummary } from '../api/client'
 import type { EventItem } from '../api/client'
-import Nav from '../components/Nav'
-import './Events.css'
+import Layout from '../components/Layout'
+import { useColumnResize } from '../hooks/useColumnResize'
 
 export default function Events() {
   const [list, setList] = useState<EventItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(50)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [summary, setSummary] = useState<{ total: number; ok: number; addr: number; inv: number; dam: number } | null>(null)
+  const { colgroup, startResize } = useColumnResize(6, 110)
+  const loadIdRef = useRef(0)
+  const tableWrapRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    getEvents(80)
-      .then(setList)
-      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load'))
-      .finally(() => setLoading(false))
-  }, [])
+  const load = useCallback(() => {
+    const myId = ++loadIdRef.current
+    setLoading(true)
+    Promise.all([
+      getEvents({ page, pageSize, sortBy: 'Timestamp', sortDir: 'desc' }),
+      getDashboardSummary({ windowMinutes: 60 }).catch(() => null)
+    ])
+      .then(([r, s]) => {
+        if (myId !== loadIdRef.current) return
+        setList(r.items)
+        setTotal(r.totalCount)
+        if (s) setSummary({
+          total: s.totalEventsLastHour,
+          ok: s.successfulEventsLastHour,
+          addr: s.eventsByCategory?.AddressMismatch ?? 0,
+          inv: s.eventsByCategory?.InvalidPostalCode ?? 0,
+          dam: s.eventsByCategory?.DamagedLabel ?? 0
+        })
+      })
+      .catch(e => { if (myId === loadIdRef.current) setError(e instanceof Error ? e.message : 'Failed') })
+      .finally(() => { if (myId === loadIdRef.current) setLoading(false) })
+  }, [page, pageSize])
+
+  useEffect(() => { load() }, [load])
+
+  const showCard = (!loading || list.length > 0) && !error
 
   return (
-    <>
-      <Nav />
-      <h1>Events</h1>
-      {loading && <p>Loading…</p>}
-      {error && <p className="error">{error}</p>}
-      {!loading && !error && (
-        <div className="card">
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Postal</th>
-                <th>Station</th>
-                <th>Zone</th>
-                <th>Result</th>
-                <th>Time (UTC)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.length === 0 && (
-                <tr><td colSpan={6}>No events yet. The background generator will create them.</td></tr>
-              )}
-              {list.map((e) => (
-                <tr key={e.id}>
-                  <td>{e.itemId}</td>
-                  <td><code>{e.postalCode}</code></td>
-                  <td>{e.stationName}</td>
-                  <td>{e.zoneName}</td>
-                  <td>
-                    {e.isSuccessful
-                      ? <span className="badge ok">OK</span>
-                      : <span className="badge err">{e.exceptionType ?? 'Exception'}</span>
-                    }
-                  </td>
-                  <td>{new Date(e.processedAtUtc).toISOString().replace('T', ' ').slice(0, 19)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <Layout title="Events" subtitle="Sorting activity in the last hour (same as Dashboard)">
+      {summary && (
+        <div className="summary-bar">
+          <span>TOTAL: {summary.total}</span>
+          <span>OK: {summary.ok}</span>
+          <span>ADDRESSMISMATCH: {summary.addr}</span>
+          <span>INVALIDPOSTALCODE: {summary.inv}</span>
+          <span>DAMAGEDLABEL: {summary.dam}</span>
         </div>
       )}
-    </>
+      {loading && list.length === 0 && <p className="loading">Loading…</p>}
+      {error && <p className="error">{error}</p>}
+      {showCard && (
+        <div className="card card-fill border-gradient">
+          <div className="table-wrap" ref={tableWrapRef}>
+            <table className="table-resizable">
+              {colgroup}
+              <thead>
+                <tr>
+                  <th>Item<span className="th-resize-handle" onMouseDown={(e) => startResize(0, e)} /></th>
+                  <th>Postal<span className="th-resize-handle" onMouseDown={(e) => startResize(1, e)} /></th>
+                  <th>Station<span className="th-resize-handle" onMouseDown={(e) => startResize(2, e)} /></th>
+                  <th>Zone<span className="th-resize-handle" onMouseDown={(e) => startResize(3, e)} /></th>
+                  <th>Result<span className="th-resize-handle" onMouseDown={(e) => startResize(4, e)} /></th>
+                  <th>Time (UTC)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.length === 0 ? (
+                  <tr><td colSpan={6}>{loading ? 'Loading…' : 'No events yet.'}</td></tr>
+                ) : (
+                  list.map(e => (
+                    <tr key={e.id}>
+                      <td>{e.itemId}</td>
+                      <td><span className="code-tag">{e.postalCode}</span></td>
+                      <td>{e.stationName}</td>
+                      <td>{e.zoneName}</td>
+                      <td>{e.isSuccessful ? <span className="badge ok">OK</span> : <span className="badge err">{e.exceptionType ?? 'Ex'}</span>}</td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{new Date(e.processedAtUtc).toISOString().replace('T', ' ').slice(0, 19)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="pagination">
+            <button type="button" className="btn-ghost" disabled={page <= 1} onClick={() => { setPage(p => p - 1); tableWrapRef.current?.scrollTo(0, 0) }}>Prev</button>
+            <span>Page {page} of {Math.max(1, Math.ceil(total / pageSize))} ({total} total)</span>
+            <button type="button" className="btn-ghost" disabled={page >= Math.ceil(total / pageSize) || total === 0} onClick={() => { setPage(p => p + 1); tableWrapRef.current?.scrollTo(0, 0) }}>Next</button>
+            <label style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Per page
+              <select value={pageSize} onChange={e => { const v = Number(e.target.value); setPageSize(v); setPage(1); tableWrapRef.current?.scrollTo(0, 0) }}>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={200}>200</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      )}
+    </Layout>
   )
 }

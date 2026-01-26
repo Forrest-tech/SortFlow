@@ -1,10 +1,12 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using SortFlow.Api.Services;
+using SortFlow.Application;
 using SortFlow.Infrastructure;
 using SortFlow.Infrastructure.Data;
 
@@ -95,6 +97,8 @@ builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("SortFlowDb") ?? string.Empty);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
+builder.Services.AddSingleton<IGeneratorState, GeneratorState>();
 builder.Services.AddHostedService<SortingEventGeneratorService>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -105,13 +109,25 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var app = builder.Build();
 
 app.UseForwardedHeaders();
-
+app.UseMiddleware<SortFlow.Api.Middleware.CorrelationIdMiddleware>();
+app.UseMiddleware<SortFlow.Api.Middleware.ExceptionHandlerMiddleware>();
 app.UseSerilogRequestLogging();
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("Frontend");
+
+// Ensure CORS preflight (OPTIONS) returns 2xx so browsers don't treat it as "Failed to fetch"
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 204;
+        return;
+    }
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -123,8 +139,9 @@ app.MapHub<SortFlow.Api.Hubs.DashboardHub>("/hubs/dashboard");
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<SortFlowDbContext>();
-    dbContext.Database.EnsureCreated();
+    var db = scope.ServiceProvider.GetRequiredService<SortFlowDbContext>();
+    db.Database.Migrate();
+    DataSeeder.SeedAsync(db).GetAwaiter().GetResult();
 }
 
 app.Run();

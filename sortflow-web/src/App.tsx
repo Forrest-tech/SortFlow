@@ -4,8 +4,10 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Events from './pages/Events'
 import Exceptions from './pages/Exceptions'
+import History from './pages/History'
 import Zones from './pages/Zones'
 import Stations from './pages/Stations'
+import Settings from './pages/Settings'
 import './App.css'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -21,8 +23,10 @@ function App() {
         <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="/events" element={<RequireAuth><Events /></RequireAuth>} />
         <Route path="/exceptions" element={<RequireAuth><Exceptions /></RequireAuth>} />
+        <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
         <Route path="/zones" element={<RequireAuth><Zones /></RequireAuth>} />
         <Route path="/stations" element={<RequireAuth><Stations /></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
