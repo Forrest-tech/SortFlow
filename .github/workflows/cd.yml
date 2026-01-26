@@ -21,17 +21,36 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet publish sortflow-api/src/SortFlow.Api/SortFlow.Api.csproj -c Release -o ./publish
-      - uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./publish
-        continue-on-error: true
-
-  # Alternative: deploy using Publish Profile only (no service principal)
-  # - run: dotnet publish ... -o ./publish
-  # - uses: azure/webapps-deploy@v3
-  #   with:
-  #     app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-  #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-  #     package: ./publish
+      - run: cd publish && zip -r ../app.zip . && cd ..
+      - name: Deploy to Azure (Kudu Zip Deploy)
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        run: |
+          python3 << 'PYEOF'
+          import os, base64, urllib.request, urllib.error, xml.etree.ElementTree as ET
+          profile = os.environ.get('PUBLISH_PROFILE', '')
+          if not profile:
+              raise SystemExit('PUBLISH_PROFILE secret not set')
+          root = ET.fromstring(profile)
+          for p in root.iter():
+              if (p.tag == 'publishProfile' or (p.tag and 'publishProfile' in p.tag)) and p.get('publishMethod') == 'Zip Deploy':
+                  host = (p.get('publishUrl') or '').split(':')[0]
+                  user, pw = p.get('userName') or '', p.get('userPWD') or ''
+                  if not host or not user or not pw:
+                      raise SystemExit('Zip Deploy profile missing publishUrl/userName/userPWD')
+                  url = f'https://{host}/api/zipdeploy'
+                  with open('app.zip', 'rb') as f:
+                      data = f.read()
+                  req = urllib.request.Request(url, data=data, method='POST',
+                      headers={'Content-Type': 'application/zip',
+                               'Authorization': 'Basic ' + base64.b64encode((user + ':' + pw).encode()).decode()})
+                  try:
+                      with urllib.request.urlopen(req) as resp:
+                          print('Zip Deploy OK, status:', resp.getcode())
+                      raise SystemExit(0)
+                  except urllib.error.HTTPError as e:
+                      body = e.read().decode(errors='replace')
+                      print('Zip Deploy failed:', e.code, body[:500])
+                      raise SystemExit(1)
+          raise SystemExit('No publishProfile with publishMethod="Zip Deploy" in publish profile')
+          PYEOF
