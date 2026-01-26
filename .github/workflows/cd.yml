@@ -33,7 +33,7 @@ jobs:
               raise SystemExit('PUBLISH_PROFILE secret not set')
           root = ET.fromstring(profile)
           for p in root.iter():
-              if (p.tag == 'publishProfile' or (p.tag and 'publishProfile' in p.tag)) and p.get('publishMethod') == 'Zip Deploy':
+              if (p.tag == 'publishProfile' or (p.tag and 'publishProfile' in p.tag)) and p.get('publishMethod') == 'ZipDeploy':
                   host = (p.get('publishUrl') or '').split(':')[0]
                   user, pw = p.get('userName') or '', p.get('userPWD') or ''
                   if not host or not user or not pw:
@@ -52,5 +52,5 @@ jobs:
                       body = e.read().decode(errors='replace')
                       print('Zip Deploy failed:', e.code, body[:500])
                       raise SystemExit(1)
-          raise SystemExit('No publishProfile with publishMethod="Zip Deploy" in publish profile')
+          raise SystemExit('No publishProfile with publishMethod="ZipDeploy" in publish profile')
           PYEOF
