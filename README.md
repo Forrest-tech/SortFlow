@@ -1,25 +1,47 @@
 # SortFlow
 
-> Enterprise-ready logistics sorting factory platform: real-time dashboard, events, exceptions, history, zones, stations, configurable generator, and JWT auth.
+> Enterprise-ready logistics sorting factory platform with real-time monitoring, configurable event generation, and operational insights.
 
-[![.NET](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet)](https://dotnet.microsoft.com/) [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
+[![.NET](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)](https://vitejs.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
+[![SignalR](https://img.shields.io/badge/SignalR-ASP.NET-512BD4?logo=dotnet)](https://learn.microsoft.com/aspnet/core/signalr)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
+[![GitHub stars](https://img.shields.io/github/stars/Forrest-tech/SortFlow?style=flat)](https://github.com/Forrest-tech/SortFlow/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Forrest-tech/SortFlow?style=flat)](https://github.com/Forrest-tech/SortFlow/forks)
 
-## Features
+## Overview
 
-- **Dashboard** — Items/min, items/hour, total today; total events and circular success rate; events by category (Successful, AddressMismatch, DamagedLabel, InvalidPostalCode) and exceptions by category; configurable time window; SignalR live updates
-- **Events / Exceptions** — Paged (configurable per-page: 10–200), filterable, sortable, resizable columns; summary bars; inner-table scroll with sticky header
-- **History** — Events and Exceptions tabs; raw data by date range; day/week/month filter; CSV export; paged with per-page selector
-- **Zones / Stations** — Full CRUD; business rules (e.g. no zone delete with stations)
-- **Settings** — Generator rate, exception probabilities, dashboard window; affects runtime
-- **Generator** — Background service; start/stop/status via `POST/GET /api/admin/generator/*`
-- **Auth** — `POST /api/auth/login` (JWT); `POST /api/auth/token` (dev)
+SortFlow simulates and monitors a high-throughput sorting factory. It provides live operational visibility, audit-ready history, and configuration controls for event rates and exception probabilities. The system is split into a .NET API and a React front-end, with real-time updates pushed via SignalR.
+
+## Product design
+
+- **Operational dashboard** — live KPIs, category breakdowns, and success rate trends
+- **Investigations view** — filterable Events and Exceptions with sticky tables and summaries
+- **Historical analytics** — date-range queries, grouped summaries, and CSV export
+- **Factory structure** — Zones and Stations CRUD with business rules
+- **Runtime controls** — tune generator rates and exception probabilities
+
+## Core functions
+
+- **Real-time updates** via SignalR for dashboard and tables
+- **Event/exception ingestion** through a background generator service
+- **Configurable settings** that immediately affect generated output
+- **Secure access** with JWT login and dev token for local testing
+
+## Popularity
+
+This project currently shows early-stage public adoption on GitHub (low stars/forks). If you want the repo to look more active, consider adding demo screenshots, a short video, and a public roadmap.
 
 ## Tech Stack
 
-| Layer     | Technologies |
-|-----------|--------------|
-| **Backend**  | .NET 8, EF Core 8, Npgsql.EntityFrameworkCore.PostgreSQL 8, JWT, SignalR, Swagger, Serilog, Clean Architecture (Api / Application / Domain / Infrastructure), Migrations |
-| **Frontend** | React 18, Vite 5, TypeScript 5.6, React Router 6, @microsoft/signalr 8 |
+| Layer         | Technologies |
+|---------------|--------------|
+| **Backend**   | .NET 8, EF Core 8, Npgsql.EntityFrameworkCore.PostgreSQL 8, JWT, SignalR, Swagger, Serilog, Clean Architecture (Api / Application / Domain / Infrastructure), Migrations |
+| **Frontend**  | React 18, Vite 5, TypeScript 5.6, React Router 6, @microsoft/signalr 8 |
+| **Database**  | PostgreSQL 16 |
+| **DevOps**    | Docker Compose, GitHub Actions (CI/CD), Azure App Service |
 
 ## Run with Docker (recommended)
 
