@@ -15,17 +15,6 @@
 
 SortFlow simulates and monitors a high-throughput sorting factory. It provides live operational visibility, audit-ready history, and configuration controls for event rates and exception probabilities. The system is split into a .NET API and a React front-end, with real-time updates pushed via SignalR.
 
-## Screenshots (navigation order)
-
-![Login](docs/screenshots/01-login.png)
-![Dashboard](docs/screenshots/02-dashboard.png)
-![Events](docs/screenshots/03-events.png)
-![Exceptions](docs/screenshots/04-exceptions.png)
-![History](docs/screenshots/05-history.png)
-![Zones](docs/screenshots/06-zones.png)
-![Stations](docs/screenshots/07-stations.png)
-![Settings](docs/screenshots/08-settings.png)
-
 ## Product design
 
 - **Operational dashboard** — live KPIs, category breakdowns, and success rate trends
@@ -141,6 +130,17 @@ npm install && npm run dev
 
 - **CI** (`ci.yml`): on push/PR to `main` — `dotnet restore/build/test` for `sortflow-api/SortFlow.sln`, `npm ci` and `npm run build` for `sortflow-web`.
 - **CD** (`cd.yml`): on push to `main` — build and deploy API to Azure App Service.
+
+## Screenshots (navigation order)
+
+![Login](docs/screenshots/01-login.png)
+![Dashboard](docs/screenshots/02-dashboard.png)
+![Events](docs/screenshots/03-events.png)
+![Exceptions](docs/screenshots/04-exceptions.png)
+![History](docs/screenshots/05-history.png)
+![Zones](docs/screenshots/06-zones.png)
+![Stations](docs/screenshots/07-stations.png)
+![Settings](docs/screenshots/08-settings.png)
 
 ## Security
 
