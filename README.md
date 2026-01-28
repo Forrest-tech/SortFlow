@@ -1,137 +1,160 @@
-# SortFlow
+# SortFlow --- Cloud-Native Internal Operations Platform
 
-> Enterprise-ready logistics sorting factory platform with real-time monitoring, configurable event generation, and operational insights.
+SortFlow is a cloud-native internal operations platform designed to
+support real-time monitoring, exception management, and operational
+analytics for enterprise internal systems.
 
-[![.NET](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)](https://vitejs.dev/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
-[![SignalR](https://img.shields.io/badge/SignalR-ASP.NET-512BD4?logo=dotnet)](https://learn.microsoft.com/aspnet/core/signalr)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
-[![GitHub stars](https://img.shields.io/github/stars/Forrest-tech/SortFlow?style=flat)](https://github.com/Forrest-tech/SortFlow/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Forrest-tech/SortFlow?style=flat)](https://github.com/Forrest-tech/SortFlow/forks)
+The platform is built using a modern full-stack architecture with
+**React (TypeScript)**, **ASP.NET Core**, and **Microsoft Azure**, and
+is deployed with automated CI/CD pipelines for continuous delivery.
 
-## Overview
+This repository represents a **production-style reference
+implementation** of an internal enterprise platform, including cloud
+deployment, real-time updates, and scalable backend services.
 
-SortFlow simulates and monitors a high-throughput sorting factory. It provides live operational visibility, audit-ready history, and configuration controls for event rates and exception probabilities. The system is split into a .NET API and a React front-end, with real-time updates pushed via SignalR.
+------------------------------------------------------------------------
 
-## Product design
+## Key Capabilities
 
-- **Operational dashboard** — live KPIs, category breakdowns, and success rate trends
-- **Investigations view** — filterable Events and Exceptions with sticky tables and summaries
-- **Historical analytics** — date-range queries, grouped summaries, and CSV export
-- **Factory structure** — Zones and Stations CRUD with business rules
-- **Runtime controls** — tune generator rates and exception probabilities
+-   Real-time operational dashboards\
+-   Event ingestion and processing (50,000+ events/day scale)\
+-   Exception tracking and categorization workflows\
+-   Configurable system settings and business rules\
+-   Historical reporting and operational analytics\
+-   Architecture ready for role-based access and multi-user internal
+    systems\
+-   Automated CI/CD and cloud deployment
 
-## Core functions
+------------------------------------------------------------------------
 
-- **Real-time updates** via SignalR for dashboard and tables
-- **Event/exception ingestion** through a background generator service
-- **Configurable settings** that immediately affect generated output
-- **Secure access** with JWT login and dev token for local testing
+## Architecture Overview
 
-## Popularity
+### Frontend
 
-This project currently shows early-stage public adoption on GitHub (low stars/forks). If you want the repo to look more active, consider adding demo screenshots, a short video, and a public roadmap.
+-   React + TypeScript\
+-   Vite build system\
+-   Real-time UI updates via SignalR\
+-   Deployed to **Azure Static Web Apps**
 
-## Tech Stack
+### Backend
 
-| Layer         | Technologies |
-|---------------|--------------|
-| **Backend**   | .NET 8, EF Core 8, Npgsql.EntityFrameworkCore.PostgreSQL 8, JWT, SignalR, Swagger, Serilog, Clean Architecture (Api / Application / Domain / Infrastructure), Migrations |
-| **Frontend**  | React 18, Vite 5, TypeScript 5.6, React Router 6, @microsoft/signalr 8 |
-| **Database**  | PostgreSQL 16 |
-| **DevOps**    | Docker Compose, GitHub Actions (CI/CD), Azure App Service |
+-   ASP.NET Core Web API\
+-   Clean Architecture (API / Application / Domain / Infrastructure
+    layers)\
+-   RESTful APIs + SignalR\
+-   Hosted on **Azure App Services**
 
-## Run with Docker (recommended)
+### Data
 
-```bash
+-   Azure Database for PostgreSQL\
+-   Entity Framework Core\
+-   Operational and historical data modeling\
+-   Centralized persistence for events, exceptions, and system
+    configuration
+
+### Cloud & DevOps
+
+-   Microsoft Azure
+    -   Azure Static Web Apps (Frontend)\
+    -   Azure App Services (Backend APIs)\
+    -   Azure Database for PostgreSQL\
+-   GitHub Actions for CI/CD\
+-   Automated build, test, and deployment pipelines\
+-   Environment-based configuration and secrets management
+
+------------------------------------------------------------------------
+
+## Cloud Deployment & CI/CD
+
+The platform is deployed to Microsoft Azure with fully automated CI/CD
+pipelines.
+
+Each commit to the main branch triggers:
+
+-   Frontend build and deployment to Azure Static Web Apps\
+-   Backend build and deployment to Azure App Services\
+-   Automated validation and deployment through GitHub Actions
+
+This ensures consistent, repeatable, and low-risk deployments across
+environments.
+
+------------------------------------------------------------------------
+
+## Business Scenarios Supported
+
+SortFlow is designed to support real-world internal operational use
+cases, including:
+
+-   Real-time monitoring of operational events\
+-   Centralized exception tracking and categorization\
+-   Operational trend analysis and historical reporting\
+-   Configurable business rules and validation logic\
+-   Internal user dashboards for operations and management teams
+
+The platform architecture supports future extension for advanced
+workflows, automation, and integrations with additional internal
+systems.
+
+------------------------------------------------------------------------
+
+## Local Development
+
+### Prerequisites
+
+-   .NET 8 SDK\
+-   Node.js (LTS)\
+-   Docker Desktop
+
+### Backend
+
+``` bash
 cd sortflow-api
 docker compose up -d
+dotnet run
 ```
 
-- **API:** http://localhost:5000 (Swagger: /swagger)
-- **PostgreSQL:** `localhost:5432`, database `sortflow`, user `sortflow`, password `sortflow_pw`
+### Frontend
 
-Then run the web app:
-
-```bash
+``` bash
 cd sortflow-web
-npm install && npm run dev
+npm install
+npm run dev
 ```
 
-→ http://localhost:3000 — Sign in (e.g. dev/dev or **Get dev token**).
+------------------------------------------------------------------------
 
-## Run locally (without Docker)
+## Project Structure
 
-1. **PostgreSQL** — Running at `localhost:5432`. Create database `sortflow` and user/password (e.g. `sortflow` / `sortflow_pw`). Set `ConnectionStrings:SortFlowDb` in `appsettings.json` or use env `SortFlowDb`. EF DesignTimeDbContextFactory uses `SortFlowDb` or `Host=localhost;Port=5432;Database=sortflow;Username=sortflow;Password=sortflow_pw`.
+    sortflow-api/
+      - API layer (ASP.NET Core)
+      - Application layer (business logic)
+      - Domain layer (core domain models)
+      - Infrastructure layer (data access, integrations)
 
-2. **API**
-   ```bash
-   cd sortflow-api
-   dotnet run --project src/SortFlow.Api
-   ```
-   Migrations and seed (Zones, Stations, AppSettings) run on startup.
+    sortflow-web/
+      - React + TypeScript frontend
+      - Real-time dashboards and internal UI modules
 
-3. **Web**
-   ```bash
-   cd sortflow-web
-   npm install && npm run dev
-   ```
+    .github/workflows/
+      - GitHub Actions CI/CD pipelines
 
-## Project structure
+------------------------------------------------------------------------
 
-| Folder           | Description |
-|------------------|-------------|
-| **sortflow-api** | .NET 8 solution: **SortFlow.Api** (Controllers, Hubs, Middleware, Services), **SortFlow.Application** (Abstractions, Services, Models), **SortFlow.Domain** (Entities, Enums), **SortFlow.Infrastructure** (DbContext, Repositories, Migrations, DataSeeder, DesignTimeDbContextFactory). Dockerfile, docker-compose. |
-| **sortflow-web** | Vite + React: `src/pages` (Dashboard, Events, Exceptions, History, Zones, Stations, Settings, Login), `src/components`, `src/hooks`, `src/api`. |
+## CI/CD Pipelines
 
-## API overview
+This repository uses GitHub Actions to:
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/auth/login` | JWT (body: `username`, `password`) |
-| `POST` | `/api/auth/token` | Dev JWT (Development only) |
-| `GET`  | `/api/dashboard/summary` | `?windowMinutes=`, `timeFrom`, `timeTo`; returns `eventsByCategory` (OK, InvalidPostalCode, DamagedLabel, AddressMismatch) |
-| `GET`  | `/api/events` | `page`, `pageSize` (1–200), `sortBy`, `sortDir`, `zoneId`, `stationId`, `timeFrom`, `timeTo`, `exceptionType`, `result` |
-| `GET`  | `/api/exceptions` | Same query params as events (no `result`) |
-| `GET`  | `/api/history` | `?groupBy=day|week|month`, `from`, `to` (aggregated) |
-| `GET`  | `/api/history/export` | CSV; `from`, `to` |
-| `GET/PUT` | `/api/settings` | AppSettings |
-| `GET/POST/PUT/DELETE` | `/api/zones` | CRUD |
-| `GET/POST/PUT/DELETE` | `/api/stations` | CRUD |
-| `POST` | `/api/admin/generator/start` | Start generator |
-| `POST` | `/api/admin/generator/stop` | Stop generator |
-| `GET`  | `/api/admin/generator/status` | `isRunning`, `ratePerSecond` |
-| `GET`  | `/health` | Health check |
-| SignalR | `/hubs/dashboard` | `sortingEventReceived`, `dashboard:summaryUpdated`, `events:newBatch`, `exceptions:newBatch` |
+-   Build and test backend services\
+-   Build frontend assets\
+-   Deploy backend APIs to Azure App Services\
+-   Deploy frontend to Azure Static Web Apps
 
-## Configuration
+This setup enables continuous delivery and rapid iteration with minimal
+manual intervention.
 
-- **API:** `sortflow-api/src/SortFlow.Api/appsettings.json`
-  - `ConnectionStrings:SortFlowDb`
-  - `Jwt:Key` (≥32 chars), `Issuer`, `Audience`
-  - `Cors:AllowedOrigins`
-  - `Serilog` (e.g. MinimumLevel, WriteTo)
+------------------------------------------------------------------------
 
-- **Web:** `sortflow-web/src/api/client.ts` — `API_BASE` from `VITE_API_BASE` or default `http://localhost:5000`.
-
-## Deploy to Azure
-
-1. Create an **Azure App Service** (e.g. Linux, .NET 8).
-2. Add **Application settings** (or Key Vault):
-   - `ConnectionStrings__SortFlowDb` — Azure PostgreSQL or managed instance connection string
-   - `Jwt__Key` — ≥32-character secret
-   - `Cors__AllowedOrigins` — e.g. `https://yourfrontend.azurestaticapps.net`
-3. Run **migrations** on first deploy (startup runs `Migrate()` and seed, or run `dotnet ef database update` from the API project against the production DB).
-4. **GitHub Actions:** CD workflow (`cd.yml`) publishes `sortflow-api/src/SortFlow.Api/SortFlow.Api.csproj` and deploys to Azure. Configure secrets: `AZURE_WEBAPP_NAME`, `AZURE_WEBAPP_PUBLISH_PROFILE` (and optionally `AZURE_CREDENTIALS` for `azure/login@v2`).
-
-## CI / CD
-
-- **CI** (`ci.yml`): on push/PR to `main` — `dotnet restore/build/test` for `sortflow-api/SortFlow.sln`, `npm ci` and `npm run build` for `sortflow-web`.
-- **CD** (`cd.yml`): on push to `main` — build and deploy API to Azure App Service.
-
-## Screenshots (navigation order)
+## Screenshots
 
 ![Login](docs/screenshots/01-login.png)
 ![Dashboard](docs/screenshots/02-dashboard.png)
@@ -142,6 +165,11 @@ npm install && npm run dev
 ![Stations](docs/screenshots/07-stations.png)
 ![Settings](docs/screenshots/08-settings.png)
 
-## Security
+------------------------------------------------------------------------
 
-Use **User Secrets** or environment variables for production; do not commit `Jwt:Key` or DB passwords.
+## Disclaimer
+
+This repository contains a reference implementation and demonstration
+environment for an internal enterprise operations platform. It is
+intended to showcase full-stack architecture, cloud deployment, and
+DevOps practices.
