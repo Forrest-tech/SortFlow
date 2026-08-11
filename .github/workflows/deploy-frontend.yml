@@ -20,9 +20,10 @@ jobs:
     - name: Install Dependencies and Build
       working-directory: ./sortflow-web
       env:
-        # 将前端请求的 API 地址硬编码注入打包过程
         VITE_API_BASE_URL: "http://184.32.186.54:8080"
         REACT_APP_API_URL: "http://184.32.186.54:8080"
+        # 兼容不同前端配置名称
+        VITE_API_URL: "http://184.32.186.54:8080"
       run: |
         npm install
         npm run build
