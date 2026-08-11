@@ -36,6 +36,6 @@ jobs:
 
     - name: Deploy static site to S3
       run: |
-        # 请将下方的 sortflow-web-frontend-2026 替换为您第一步创建的实际 S3 桶名
+        # 请将下方的 sortflow-web-frontend 替换为您第一步创建的实际 S3 桶名
         # 如果 sortflow-web 编译输出路径是 build，请修改为 ./sortflow-web/build
-        aws s3 sync ./sortflow-web/dist s3://sortflow-web-frontend-2026 --delete
+        aws s3 sync ./sortflow-web/dist s3://sortflow-web-frontend --delete
