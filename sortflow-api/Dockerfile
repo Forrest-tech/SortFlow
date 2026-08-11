@@ -1,7 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 拷贝代码并编译发布
 COPY ./sortflow-api/ ./sortflow-api/
 WORKDIR /src/sortflow-api
 RUN dotnet restore
@@ -12,4 +11,7 @@ WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "sortflow-api.dll"]
+
+# 修正点：替换为真实的 DLL 名称（注意大小写，Linux 对大小写敏感）
+# 例如: SortFlow.API.dll 或 SortFlowApi.dll
+ENTRYPOINT ["dotnet", "SortFlow.API.dll"]
