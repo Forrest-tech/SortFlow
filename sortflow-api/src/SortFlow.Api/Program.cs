@@ -52,15 +52,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// 1. 配置 CORS 策略名称为 AllowAll
+// 1. 配置 CORS 策略，显式声明策略名称为 "AllowAll"
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.SetIsOriginAllowed(_ => true) // 允许来自 S3 的跨域请求
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // 允许 SignalR 携凭据连接
+              .AllowCredentials();          // 允许 SignalR 携凭据连接
     });
 });
 
@@ -116,7 +116,7 @@ app.UseSerilogRequestLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 2. 核心修正：使用与 AddPolicy 对应的 "AllowAll" 名称，并删除手动改写 OPTIONS 204 的中间件（UseCors 会自动正确处理 OPTIONS 响应并加上 Allow 响应头）
+// 2. 核心修正：UseCors("AllowAll") 成功匹配上面注册的 "AllowAll" 策略
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
