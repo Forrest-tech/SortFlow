@@ -1,11 +1,15 @@
+# 编译阶段
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+COPY ["sortflow-api.csproj", "./"]
+RUN dotnet restore "sortflow-api.csproj"
 COPY . .
-RUN dotnet restore SortFlow.sln
-RUN dotnet publish src/SortFlow.Api/SortFlow.Api.csproj -c Release -o /app/publish
+RUN dotnet publish "sortflow-api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# 运行阶段
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
 COPY --from=build /app/publish .
-EXPOSE 80
-ENTRYPOINT ["dotnet", "SortFlow.Api.dll"]
+ENTRYPOINT ["dotnet", "sortflow-api.dll"]
