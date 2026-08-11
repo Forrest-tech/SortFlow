@@ -52,15 +52,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// 1. 配置 CORS 策略名称为 AllowAll
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Frontend", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-        policy.WithOrigins(origins)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -116,18 +115,8 @@ app.UseSerilogRequestLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("Frontend");
-
-// Ensure CORS preflight (OPTIONS) returns 2xx so browsers don't treat it as "Failed to fetch"
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 204;
-        return;
-    }
-    await next();
-});
+// 2. 核心修正：使用与 AddPolicy 对应的 "AllowAll" 名称，并删除手动改写 OPTIONS 204 的中间件（UseCors 会自动正确处理 OPTIONS 响应并加上 Allow 响应头）
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
