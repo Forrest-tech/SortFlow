@@ -1,0 +1,41 @@
+name: Deploy Frontend to AWS S3
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies and Build
+      working-directory: ./sortflow-web
+      env:
+        # 将前端请求的 API 地址硬编码注入打包过程
+        VITE_API_BASE_URL: "http://184.32.186.54:8080"
+        REACT_APP_API_URL: "http://184.32.186.54:8080"
+      run: |
+        npm install
+        npm run build
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: Deploy static site to S3
+      run: |
+        # 请将下方的 sortflow-web-frontend-2026 替换为您第一步创建的实际 S3 桶名
+        # 如果 sortflow-web 编译输出路径是 build，请修改为 ./sortflow-web/build
+        aws s3 sync ./sortflow-web/dist s3://sortflow-web-frontend-2026 --delete
