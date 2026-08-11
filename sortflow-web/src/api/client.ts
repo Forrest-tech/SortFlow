@@ -38,8 +38,9 @@ async function fetchApi<T>(path: string, init?: RequestInit, params?: Query): Pr
 }
 
 // 修改后的 loginDev:
-export async function loginDev() {
-  return fetchApi('/api/auth/login', { 
+export async function loginDev(): Promise<{ token: string }> {
+  // 直接向后端的真实 login 接口发送默认凭据请求
+  return fetchApi<{ token: string }>('/api/auth/login', { 
     method: 'POST',
     body: JSON.stringify({ username: 'admin', password: 'Admin123!' })
   });
