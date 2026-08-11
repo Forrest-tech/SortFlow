@@ -20,10 +20,10 @@ jobs:
     - name: Install Dependencies and Build
       working-directory: ./sortflow-web
       env:
-        VITE_API_BASE_URL: "http://184.32.186.54:8080"
-        REACT_APP_API_URL: "http://184.32.186.54:8080"
-        # 兼容不同前端配置名称
-        VITE_API_URL: "http://184.32.186.54:8080"
+        # 将 IP 更新为最新的 44.248.39.215
+        VITE_API_BASE_URL: "http://44.248.39.215:8080"
+        VITE_API_URL: "http://44.248.39.215:8080"
+        REACT_APP_API_URL: "http://44.248.39.215:8080"
       run: |
         npm install
         npm run build
