@@ -1,12 +1,13 @@
-# 编译阶段
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["sortflow-api.csproj", "./"]
-RUN dotnet restore "sortflow-api.csproj"
-COPY . .
-RUN dotnet publish "sortflow-api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# 运行阶段
+# 使用通配符 *.csproj 匹配当前目录下的工程文件
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . .
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 EXPOSE 8080
