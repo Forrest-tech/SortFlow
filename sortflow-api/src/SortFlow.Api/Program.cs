@@ -55,11 +55,12 @@ builder.Services.AddSwaggerGen(options =>
 // 1. 配置 CORS 策略名称为 AllowAll
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(_ => true) // 允许来自 S3 的跨域请求
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // 允许 SignalR 携凭据连接
     });
 });
 
