@@ -1,15 +1,27 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setToken } from '../api/client'
+import { login, setToken } from '../api/client'
 import './Login.css'
 
 export default function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // 自动写入 Token 并跳转到 Dashboard，彻底跳过登录界面
-    setToken('dev-auto-token')
-    navigate('/dashboard', { replace: true })
+    async function autoFetchRealToken() {
+      try {
+        // 请求后端获取真实的 JWT Token
+        const { token } = await login('admin', 'Admin123!')
+        if (token) {
+          setToken(token)
+        }
+      } catch (e) {
+        console.error('Auto login failed:', e)
+      } finally {
+        navigate('/dashboard', { replace: true })
+      }
+    }
+
+    autoFetchRealToken()
   }, [navigate])
 
   return (
