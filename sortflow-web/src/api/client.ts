@@ -37,8 +37,12 @@ async function fetchApi<T>(path: string, init?: RequestInit, params?: Query): Pr
   return res.json();
 }
 
-export async function loginDev(): Promise<{ token: string }> {
-  return fetchApi<{ token: string }>('/api/auth/token', { method: 'POST' });
+// 修改后的 loginDev:
+export async function loginDev() {
+  return fetchApi('/api/auth/login', { 
+    method: 'POST',
+    body: JSON.stringify({ username: 'admin', password: 'Admin123!' })
+  });
 }
 
 export async function login(username: string, password: string): Promise<{ token: string }> {
