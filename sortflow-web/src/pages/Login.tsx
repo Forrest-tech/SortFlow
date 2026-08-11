@@ -1,32 +1,82 @@
-import { useEffect } from 'react'
+import { useState, FormEvent, MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, setToken } from '../api/client'
 import './Login.css'
 
 export default function Login() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [username, setUsername] = useState('admin')
+  const [password, setPassword] = useState('changeme')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    async function autoLogin() {
-      try {
-        // 使用后端 AuthController.cs 定义的真实密码 changeme
-        const { token } = await login('admin', 'changeme')
-        if (token) {
-          setToken(token)
-        }
-      } catch (e) {
-        console.error('Auto login failed:', e)
-      } finally {
-        navigate('/dashboard', { replace: true })
-      }
+  // 处理常规登录表单提交
+  async function handleLogin(e: FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      const user = username || 'admin'
+      const pass = password || 'changeme'
+      const { token } = await login(user, pass)
+      setToken(token)
+      navigate('/dashboard')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Login failed')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    autoLogin()
-  }, [navigate])
+  // 处理快捷 Dev 登录按钮点击
+  async function handleDevToken(e: MouseEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      const { token } = await login('admin', 'changeme')
+      setToken(token)
+      navigate('/dashboard')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="login-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: '#8b5cf6' }}>
-      <h2>Loading Dashboard...</h2>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-logo" />
+        <h1 className="login-title">SortFlow</h1>
+        <p className="login-desc">Sign in to access the dashboard.</p>
+        
+        <form className="login-form" onSubmit={handleLogin}>
+          <input 
+            type="text" 
+            placeholder="Username" 
+            value={username} 
+            onChange={e => setUsername(e.target.value)} 
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+          />
+          <button type="submit" className="btn btn-login" disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+
+        <p className="login-dev">
+          <button type="button" className="btn-ghost btn-dev" onClick={handleDevToken} disabled={loading}>
+            Get dev token & sign in
+          </button>
+        </p>
+
+        {error && <p className="error">{error}</p>}
+      </div>
     </div>
   )
 }
