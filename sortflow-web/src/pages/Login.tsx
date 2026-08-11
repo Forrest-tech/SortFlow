@@ -7,10 +7,10 @@ export default function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    async function autoFetchRealToken() {
+    async function autoLogin() {
       try {
-        // 请求后端获取真实的 JWT Token
-        const { token } = await login('admin', 'Admin123!')
+        // 使用后端 AuthController.cs 定义的真实密码 changeme
+        const { token } = await login('admin', 'changeme')
         if (token) {
           setToken(token)
         }
@@ -21,7 +21,7 @@ export default function Login() {
       }
     }
 
-    autoFetchRealToken()
+    autoLogin()
   }, [navigate])
 
   return (
